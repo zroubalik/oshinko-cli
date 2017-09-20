@@ -68,6 +68,14 @@ node {
 					echo("Wasn't able to notify Github: ${err}")
 				}
 
+				sh('''echo "Check if we can resolve $OCP_HOSTNAME"
+						CURL_COUNTER=20
+						until curl -sIL $OCP_HOSTNAME; do 
+							((CURL_COUNTER--))
+							if [ "$CURL_COUNTER" -eq 0 ]; then echo "Wasn't able to resolve $OCP_HOSTNAME"; exit 1; fi
+							sleep 1
+						done''')
+
 				// login to openshift instance
 				sh('oc login https://$OCP_HOSTNAME:8443 -u $OCP_USER -p $OCP_PASSWORD --insecure-skip-tls-verify=true')
 				// let's start on a specific project, to prevent start on a random project which could be deleted in the meantime
